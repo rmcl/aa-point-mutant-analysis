@@ -12,7 +12,7 @@
 # Load necessary modules (if applicable)
 # module load rosetta
 
-OUTPUT_DIR=outputs/
+OUTPUT_DIR=/home/rmcl/projects/trna-synthetase-combined/job-runs/singleaa-mutants-5-1-25/outputs/
 
 source /packages/miniconda3/20240410/etc/profile.d/conda.sh
 conda activate rosetta_env
@@ -33,6 +33,6 @@ echo "Task ID: $SLURM_ARRAY_TASK_ID, Processing files $start_index to $end_index
 sed -n "$((start_index + 1)),$((end_index + 1))p" $pdb_list | while read mutation_detail; do
     echo "MODIFY MUTATION: ${mutation_detail}"
 
-    python ./single_aa_score_batch.py ${mutation_detail}
+    python ./mutant_analysis/main.py ${mutation_detail} ${OUTPUT_DIR}
 
 done
