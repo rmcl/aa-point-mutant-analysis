@@ -1,4 +1,5 @@
 import pyrosetta
+from pyrosetta import rosetta
 
 from pyrosetta.rosetta.protocols.rosetta_scripts import XmlObjects
 from pyrosetta.rosetta.core.pack.task import TaskFactory
@@ -20,8 +21,6 @@ from pyrosetta.rosetta.core.select.residue_selector import (
 )
 from pyrosetta.rosetta.core.chemical import HYDROPHOBIC
 from pyrosetta.rosetta.protocols.relax import FastRelax
-from gce_utils.pyrosetta_setup import initialize_pyrosetta
-
 from pyrosetta.rosetta.core.scoring import get_score_function
 
 """Import a bunch of components of the score function.
@@ -54,6 +53,22 @@ metric_components = [
 END SCORE IMPORTS
 """
 
+def initialize_pyrosetta(ligand_params_path):
+
+    # Initialize PyRosetta
+    pyrosetta.init(
+        f'-corrections::gen_potential -corrections::beta_nov16 '
+        f'-load_PDB_components false -extra_res_fa {ligand_params_path}')
+
+    # Load ScoreFunctions
+    scorefxn = pyrosetta.create_score_function("beta_genpot.wts")
+    ico_scorefxn = pyrosetta.create_score_function("beta_nov16.wts")
+
+    return {
+        'scorefxn': scorefxn,
+        'ico_scorefxn': ico_scorefxn
+    }
+
 
 
 class RussGCERosettaMetrics:
@@ -66,9 +81,9 @@ class RussGCERosettaMetrics:
         self.create_residue_selectors(interface_size)
         #self.initialize_task_factory()
 
-    def relax_pose(self, pose, num_repeats = 5):
+    def relax_pose(self, pose):
         """Relax the pose using FastRelax."""
-        relax = FastRelax(self.scorefxn, num_repeats) # number of repeats
+        relax = FastRelax(self.scorefxn)
         relax.apply(pose)
 
     def get_residues_within_distance_of_ligand(self, pose, max_dist=8.0):

@@ -1,5 +1,6 @@
 import sys
 import json
+import os
 sys.path.append('./')
 
 import pyrosetta
@@ -11,7 +12,11 @@ from mutant_analysis.pyrosetta_scoring import RussGCERosettaMetrics
 from mutant_analysis.mutants import create_mutated_pose_by_residue_dict
 from mutant_analysis.mutants import compare_poses
 
-from .constants import (
+
+import sys
+sys.path.append('./inputs/acridone-alanine/')
+
+from constants_acridone import (
     WILD_TYPE_STARTING_AMINO_ACIDS,
     ALL_AMINO_ACIDS,
     LIG_PARAMS_PATH,
@@ -41,15 +46,21 @@ def initialize(complex_pdb_path, lig_params_path):
 
 def check_for_already_done(output_score_file_path):
     already_done = set()
-    with open(output_score_file_path, 'r') as fp:
-        for l in fp:
-            data = json.loads(l)
-            already_done.add((data['residue_position'], data['mutated_aa']))
+    try:
+        with open(output_score_file_path, 'r') as fp:
+            for l in fp:
+                data = json.loads(l)
+                already_done.add((data['residue_position'], data['mutated_aa']))
+
+    except FileNotFoundError:
+        # no scores yet!
+        pass
 
     return already_done
+    
 
 
-def score_mutant(metric_calculator, wt_pose, residue_position, mutated_aa):
+def score_mutant(metric_calculator, wt_pose, residue_position, mutated_aa, output_dir_path):
     wt_amino_acid = WILD_TYPE_STARTING_AMINO_ACIDS[residue_position]
 
     mutated_pose = create_mutated_pose_by_residue_dict(wt_pose, {
@@ -58,12 +69,14 @@ def score_mutant(metric_calculator, wt_pose, residue_position, mutated_aa):
 
     compare_poses(wt_pose, mutated_pose)
 
-    metric_calculator.relax_pose(mutated_pose, num_repeats=5)
+    metric_calculator.relax_pose(mutated_pose)
 
     total_score, interface_total_score, interface_score_parts = \
         metric_calculator.score_pose_interface(mutated_pose)
 
-    mutated_pose.dump_pdb(f'single-aa-mutants/mutated_{wt_amino_acid}{residue_position}{mutated_aa}.pdb')
+    os.makedirs(f'{output_dir_path}/single-aa-mutants', exist_ok=True)
+
+    mutated_pose.dump_pdb(f'{output_dir_path}/single-aa-mutants/mutated_{wt_amino_acid}{residue_position}{mutated_aa}.pdb')
 
     result = {
         'mutated_aa': mutated_aa,
@@ -114,7 +127,7 @@ def run():
 
     print(f'Mutated {mutated_aa} at position {residue_position}')
 
-    result = score_mutant(metric_calculator, aa_wt_pose, residue_position, mutated_aa)
+    result = score_mutant(metric_calculator, aa_wt_pose, residue_position, mutated_aa, OUTPUT_DIR_PATH)
     with open(output_score_file_path, 'a+') as f:
         f.write(json.dumps(result) + '\n')
         f.flush()
