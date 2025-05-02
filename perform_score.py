@@ -13,10 +13,9 @@ from mutant_analysis.mutants import create_mutated_pose_by_residue_dict
 from mutant_analysis.mutants import compare_poses
 
 
-import sys
-sys.path.append('./inputs/acridone-alanine/')
 
-from constants_acridone import (
+sys.path.append('./inputs/amino-acridone-alanine/')
+from constants_amino_acridone import (
     WILD_TYPE_STARTING_AMINO_ACIDS,
     ALL_AMINO_ACIDS,
     LIG_PARAMS_PATH,

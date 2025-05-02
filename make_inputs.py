@@ -8,8 +8,12 @@ import os
 
 
 
-sys.path.append('./inputs/acridone-alanine/')
-from constants_acridone import WILD_TYPE_STARTING_AMINO_ACIDS, ALL_AMINO_ACIDS
+#sys.path.append('./inputs/acridone-alanine/')
+#from constants_acridone import WILD_TYPE_STARTING_AMINO_ACIDS, ALL_AMINO_ACIDS
+
+
+sys.path.append('./inputs/amino-acridone-alanine/')
+from constants_amino_acridone import WILD_TYPE_STARTING_AMINO_ACIDS, ALL_AMINO_ACIDS
 
 
 def main():
