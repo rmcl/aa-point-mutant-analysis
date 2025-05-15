@@ -133,59 +133,6 @@ class RussGCERosettaMetrics:
         self.hydrophobic_selector = ResiduePropertySelector()
         self.hydrophobic_selector.set_property(HYDROPHOBIC)
 
-        # Logical combinations
-        # WARN WARN WARN THIS DOESN'T SEEM TO WORK. USE GET_RESIDUES_WITHIN_DISTANCE_OF_LIGAND
-        # SEEMS TO HAVE SOMETHING TO DO WITH THE LIGAND
-        """
-        self.interface_selector = OrResidueSelector(
-            synthase_interface_selector,
-            ligx_interface_selector)
-
-        self.not_interface_selector = NotResidueSelector(self.interface_selector)
-
-        self.interface_synthase_selector = AndResidueSelector(
-            synthase_selector,
-            self.interface_selector)
-
-        self.interface_ligx_selector = AndResidueSelector(
-            lig_x_selector,
-            self.interface_selector)
-        self.hydrophobic_interface_synthase_selector = AndResidueSelector(
-            self.hydrophobic_selector,
-            self.interface_synthase_selector)
-
-        # All residues selector (used by default)
-        true_selector = TrueResidueSelector()
-        """
-    """
-    def initialize_task_factory(self):
-        ""Initialize the task factory with the necessary operations.
-
-        In particular restrict to the interface.""
-        # Task operations
-        init = InitializeFromCommandline()
-
-        extra_rot = ExtraRotamersGeneric()
-        extra_rot.ex1(True)
-        extra_rot.ex2(True)
-        extra_rot.extrachi_cutoff(0)
-
-        restrict = RestrictToRepacking()
-
-        # Use residue selector to restrict packing to interface only
-        restrict_interface = OperateOnResidueSubset(
-            RestrictToRepackingRLT(),
-            self.interface_selector,  # defined earlier as AndResidueSelector
-            True  # apply to selected residues
-        )
-
-        # Create task factory and add all task operations
-        task_factory = TaskFactory()
-        task_factory.push_back(init)
-        task_factory.push_back(extra_rot)
-        task_factory.push_back(restrict)
-        task_factory.push_back(restrict_interface)
-    """
 
     def score_pose_interface(self, pose_to_score):
         """Compute Rosetta score and the score for the interface."""
@@ -317,6 +264,19 @@ XML_SCORING_SCRIPT = """
     <Ddg name="ddg_norep" chain_num="2" threshold="-1" jump="1"
         repack="0" confidence="0" scorefxn="score"/>
 
+    <BuriedUnsatHbonds2
+        name="bufied_unsat_hbonds2"
+        jump_number="1"
+    />
+
+    <PackStat name="pstat" threshold="0.65" chain="1" confidence="0"/>
+    <LigInterfaceEnergy
+        name="lig_interface_energy"
+        scorefxn="score"
+        include_cstE="0"
+        jump_number="1"
+    />
+
     <ShapeComplementarity
         name="sc" min_sc="0.5"
         residue_selector1="A"
@@ -327,9 +287,9 @@ XML_SCORING_SCRIPT = """
     <SimpleMetricFilter name="filter_sasa" metric="tot_sasa"
           cutoff="100" comparison_type="gt" confidence="0"/>
     <SimpleMetricFilter name="filter_pol_sasa" metric="pol_sasa"
-    cutoff="100" comparison_type="gt" confidence="0"/>
+        cutoff="100" comparison_type="gt" confidence="0"/>
     <SimpleMetricFilter name="filter_hyd_sasa" metric="hyd_sasa"
-    cutoff="100" comparison_type="gt" confidence="0"/>
+        cutoff="100" comparison_type="gt" confidence="0"/>
 
     <Sasa name="sasa" confidence="0"/>
 
@@ -347,6 +307,10 @@ XML_SCORING_SCRIPT = """
     <Add filter="ddg_rep"/>
     <Add filter="ddg_norep"/>
     <Add filter="sc"/>
+
+    <Add filter="bufied_unsat_hbonds2" />
+    <Add filter="pstat"/>
+    <Add filter="lig_interface_energy" />
 
     <Add filter="filter_sasa"/>
     <Add filter="filter_pol_sasa"/>
