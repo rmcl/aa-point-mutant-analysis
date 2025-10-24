@@ -3,6 +3,10 @@
 Mutate residues throughout a protein-ligand complex and compute scores like delta delta G.
 
 
+## Installation
+
+The main dependency is pyrosetta which you can get here: https://www.pyrosetta.org/downloads
+
 ## How to run
 
 ```
@@ -45,4 +49,5 @@ The run.sbatch script in the project root launches 50 parallel tasks to evaluate
 ## Questions?
 
 Drop me a line... rmcl@uoregon.edu
+
 
