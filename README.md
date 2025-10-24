@@ -13,6 +13,16 @@ python ./aa-point-mutant-analysis/perform_score.py <pos>,<residue aa> <output-di
 python ./aa-point-mutant-analysis/perform_score.py 256,A ./outputs/
 ```
 
+### Output
+
+The script outptus a jsonl (list of json dictionary) file with each line representing one mutation at a site. An example is in `examples/`.
+
+```
+{"mutated_aa": "A", "residue_position": 189, "total_score": -607.7893564554801, ...}
+{"mutated_aa": "A", "residue_position": 190, "total_score": -607.7893564554801, ...}
+...
+```
+
 ## Running with SLURM
 
 The run.sbatch script in the project root launches 50 parallel tasks to evaluate point mutations. It requires an input text file listing mutation sites and target residues.
@@ -35,3 +45,4 @@ The run.sbatch script in the project root launches 50 parallel tasks to evaluate
 ## Questions?
 
 Drop me a line... rmcl@uoregon.edu
+
