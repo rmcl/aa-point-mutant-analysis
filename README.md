@@ -13,7 +13,19 @@ python ./aa-point-mutant-analysis/perform_score.py <pos>,<residue aa> <output-di
 python ./aa-point-mutant-analysis/perform_score.py 256,A ./outputs/
 ```
 
-## Using slurm job
+## Running with SLURM
 
-check out slurm.sbatch in the root!
+The run.sbatch script in the project root launches 50 parallel tasks to evaluate point mutations. It requires an input text file listing mutation sites and target residues.
 
+### Basic steps:
+
+1. Create a input.txt file with lines of the following format:
+
+```
+256,A
+257,A
+258,A
+259,A
+```
+
+2. sbatch run.batch
